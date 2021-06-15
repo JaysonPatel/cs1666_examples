@@ -34,7 +34,7 @@ impl Demo for SDL06 {
 			for event in self.core.event_pump.poll_iter() {
 				match event {
 					Event::Quit{..} | Event::KeyDown{keycode: Some(Keycode::Escape), ..} => break 'gameloop,
-					Event::KeyDown{keycode: Some(k), ..} => {
+					Event::KeyDown{keycode: Some(k), repeat: false, ..} => {
 						match k {
 							Keycode::W => y_vel -= 1,
 							Keycode::A => x_vel -= 1,
@@ -43,12 +43,21 @@ impl Demo for SDL06 {
 							_ => {},
 						}
 					}
+					Event::KeyUp{keycode: Some(k), repeat: false, ..} => {
+						match k {
+							Keycode::W => y_vel += 1,
+							Keycode::A => x_vel += 1,
+							Keycode::S => y_vel -= 1, 
+							Keycode::D => x_vel -= 1,
+							_ => {},
+						}
+					}
 					_ => {},
 				}
 			}
 
-			x_pos += x_vel;
-			y_pos += y_vel;
+			x_pos = (x_pos + x_vel).clamp(0, (CAM_W - w) as i32);
+			y_pos = (y_pos + y_vel).clamp(0, (CAM_H - w) as i32);
 
 			self.core.wincan.set_draw_color(Color::BLACK);
 			self.core.wincan.clear();
